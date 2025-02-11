@@ -44,7 +44,7 @@ const GlobalStyles = createGlobalStyle`
   body {
     background-color: black;
     color: white;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Centarell, 'Open Sans', 'Helvetica Neue', san-seif;
+    font-family: 'Noto Sans', Arial, sans-serif;
   }`
 
 const Wrapper = styled.div`
@@ -60,7 +60,7 @@ function App() {
     await auth.authStateReady()
     setLoading(false)
   }
-  useEffect(() => {init(), []})
+  useEffect(() => {init()}, [])
   return (
     <Wrapper>
       <GlobalStyles />
