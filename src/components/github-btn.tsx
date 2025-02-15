@@ -10,6 +10,7 @@ export default function GithubBtn() {
       const provider = new GithubAuthProvider()
       await signInWithPopup(auth, provider)
       navigate("/")
+      
     } catch(e) {
       console.error(e)
     }

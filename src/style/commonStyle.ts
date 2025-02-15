@@ -8,7 +8,7 @@ export const Wrapper = styled.div`
   justify-content: center;
   width: 420px;
   padding: 50px 0;
-`
+`;
 
 export const Form = styled.form`
   margin: 50px auto 20px auto;
@@ -16,7 +16,7 @@ export const Form = styled.form`
   flex-direction: column;
   gap: 10px;
   width: 100%;
-`
+`;
 
 export const Input = styled.input`
   padding: 10px 20px;
@@ -30,23 +30,24 @@ export const Input = styled.input`
       opacity: 0.8;
     }
   }
-`
+`;
 
 export const Title = styled.h1`
   font-size: 42px;
-`
+`;
 
 export const Error = styled.span`
   font-weight: 600;
   color: tomato;
-`
+  margin-bottom: 20px;
+`;
 
 export const Switcher = styled.span`
   a {
-    color:rgb(28, 146, 224);
+    color: rgb(28, 146, 224);
     margin-left: 10px;
   }
-`
+`;
 export const Button = styled.span`
   background-color: white;
   color: black;
@@ -61,8 +62,8 @@ export const Button = styled.span`
   justify-content: center;
   margin-top: 50px;
   cursor: pointer;
-`
+`;
 export const Logo = styled.img`
   height: 25px;
   margin-right: 5px;
-`
+`;
