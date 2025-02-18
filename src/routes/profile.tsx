@@ -27,7 +27,9 @@ export default function Profile() {
   const [avatar, setAvatar] = useState(user?.photoURL);
   const [name, setName] = useState(user?.displayName);
   const [isEdit, setIsEdit] = useState(false);
-  const [tweets, setTweets] = useState<ITweet[]>([]);
+  const [tweets, setTweets] = useState<ITweet[]>([]); // 내가 작성한 트윗
+  const [likedTweets, setLikedTweets] = useState<ITweet[]>([]); // 내가 좋아요 누른 트윗
+  const [selectedTab, setSelectedTab] = useState("all"); // "all" or "like"
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const _file = e.target.files?.[0]; // 파일 선택
@@ -79,7 +81,6 @@ export default function Profile() {
       }
     }
   };
-
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "name") setName(value);
@@ -106,7 +107,7 @@ export default function Profile() {
       orderBy("createAt", "desc")
     );
     const snapshot = await getDocs(tweetQuery);
-    const tweets = snapshot.docs.map((doc) => {
+    const fetchedTweets = snapshot.docs.map((doc) => {
       const {
         tweet,
         createAt,
@@ -117,8 +118,9 @@ export default function Profile() {
         replyCount,
         retweetCount,
         view,
-        reply,
+        replys,
         photoURL,
+        likedUserIds,
       } = doc.data();
       return {
         tweet,
@@ -131,25 +133,72 @@ export default function Profile() {
         retweetCount,
         id: doc.id,
         view,
-        reply,
+        replys,
         photoURL,
+        likedUserIds,
       };
     });
-    setTweets(tweets);
+    setTweets(fetchedTweets);
   };
+  const fetchLikedTweets = async () => {
+    if (!user?.uid) return;
+    const likeQuery = query(
+      collection(db, "tweets"),
+      where("likedUserIds", "array-contains", user?.uid),
+      orderBy("createAt", "desc")
+    );
+    const snapshot = await getDocs(likeQuery);
+    const fetchedLikedTweets = snapshot.docs.map((doc) => {
+      const {
+        tweet,
+        createAt,
+        userId,
+        username,
+        fileData,
+        likeCount,
+        replyCount,
+        retweetCount,
+        view,
+        replys,
+        photoURL,
+        likedUserIds,
+      } = doc.data();
+      return {
+        tweet,
+        createAt,
+        userId,
+        username,
+        fileData,
+        likeCount,
+        replyCount,
+        retweetCount,
+        id: doc.id,
+        view,
+        replys,
+        photoURL,
+        likedUserIds,
+      };
+    });
+    setLikedTweets(fetchedLikedTweets);
+  };
+  // 탭 변경 시 처리
+  const handleTabClick = (tab: string) => {
+    setSelectedTab(tab);
+  };
+
   useEffect(() => {
-    fetchTweets();
-  }, []);
+    if (selectedTab === "like") fetchLikedTweets();
+    else fetchTweets();
+  }, [selectedTab]); // 컴포넌트 처음 렌더링 시 실행
+
+  // 선택된 탭에 따라 트윗 목록 변경
+  const tweetsToDisplay = selectedTab === "all" ? tweets : likedTweets;
 
   return (
     <div
       style={{
         margin: "0 auto",
-        display: "grid",
-        gap: "15px",
-        gridTemplateRows: "1fr 5fr",
         height: "100vh",
-        overflowY: "hidden",
       }}
     >
       {avatar ? (
@@ -194,11 +243,14 @@ export default function Profile() {
           </svg>
         </div>
       )}
-      <div style={{ fontSize: "22px", textAlign: "center" }} className="row">
+      <div style={{ margin: "10px 0 30px 0" }} className="row">
         <div className="col-4 profileTxt" style={{ textAlign: "left" }}>
           PROFILE
         </div>
-        <div className="col-4">
+        <div
+          className="col-4 text-center"
+          style={{ fontSize: "20px", lineHeight: "36px" }}
+        >
           {user?.displayName ? user.displayName : "Anonymous"}
           {!isEdit && (
             <i
@@ -218,11 +270,11 @@ export default function Profile() {
       {isEdit && (
         <div
           style={{
-            padding: "20px 40px 30px 40px",
+            padding: "15px 30px 30px 30px",
             borderRadius: "15px",
             border: "1px solid #24a4f2",
             width: "100%",
-            marginTop: "20px",
+            margin: "20px 0",
             position: "relative",
           }}
         >
@@ -312,8 +364,30 @@ export default function Profile() {
           </form>
         </div>
       )}
-      <div className="scroll tweetWrapper" style={{ marginTop: "10px" }}>
-        {tweets.map((tweet) => (
+      {/* All | LIKE 탭 */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          margin: "20px 0",
+        }}
+      >
+        <button
+          className={`profileBtn ${selectedTab === "all" ? "active" : ""}`}
+          onClick={() => handleTabClick("all")}
+        >
+          ALL
+        </button>
+        <button
+          className={`profileBtn ${selectedTab === "like" ? "active" : ""}`}
+          onClick={() => handleTabClick("like")}
+        >
+          LIKE
+        </button>
+      </div>
+
+      <div className="scroll tweetWrapper">
+        {tweetsToDisplay.map((tweet) => (
           <Tweet key={tweet.id} {...tweet} />
         ))}
       </div>
